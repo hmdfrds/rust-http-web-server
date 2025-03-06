@@ -1,0 +1,8 @@
+{
+  "host": "0.0.0.0",
+  "port": 8080,
+  "admin_port": 8081,
+  "document_root": "./www",
+  "max_threads": 50,
+  "log_file": "./server.log"
+}
