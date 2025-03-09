@@ -7,29 +7,30 @@ mod admin;
 mod config;
 mod handler;
 mod logger;
+mod server;
 mod utils;
 
 fn main() {
     // Load configuration
-    let config = match Config::load_from_file("config.json") {
-        Ok(cfg) => cfg,
-        Err(e) => {
-            eprintln!("Error loading configuration: {}", e);
-            process::exit(1)
-        }
-    };
+    let config = Arc::new(Config::load_from_file("config.json").unwrap_or_else(|e| {
+        eprintln!("Error loading configuration: {}", e);
+        process::exit(1);
+    }));
 
-    println!("Configuration loaded successfully: {:?}", config);
+    println!("Configuration loaded: {:?}", config);
 
-    // Initialize the logger
+    // Initialize logger and wrap it in an Arc for shared ownership
     let logger = Arc::new(Logger::new(&config.log_file));
-    // Start periodic logging every 60 seconds
     logger.clone().start_periodic_stats(Duration::from_secs(60));
 
-    // Example log entries for testing
-    logger.log_request("127.0.0.1", "GET /index.html HTTP/1.1", 200);
-    logger.log_error("Test error message");
+    // Start the HTTP server in a separate thread
+    let logger_clone = Arc::clone(&logger);
+    let config_clone = config.clone();
+    std::thread::spawn(move || {
+        server::start_server(config_clone, logger_clone);
+    });
 
+    // Prevent main from exiting immediately.
     loop {
         std::thread::sleep(Duration::from_secs(60));
     }
