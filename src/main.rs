@@ -1,5 +1,6 @@
 use std::{process, sync::Arc, time::Duration};
 
+use admin::AdminInterface;
 use config::Config;
 use logger::Logger;
 
@@ -29,6 +30,10 @@ fn main() {
     std::thread::spawn(move || {
         server::start_server(config_clone, logger_clone);
     });
+
+    // Start the admin interface.
+    let admin_interface = AdminInterface::new(&config.host, config.admin_port, Arc::clone(&logger));
+    admin_interface.start();
 
     // Prevent main from exiting immediately.
     loop {

@@ -1,7 +1,7 @@
-use core::error;
 use std::{
     fs::OpenOptions,
     io::Write,
+    path::PathBuf,
     sync::{Arc, Mutex},
     time::{Duration, Instant},
 };
@@ -10,6 +10,7 @@ use chrono::Utc;
 
 pub struct Logger {
     file: Mutex<std::fs::File>,
+    file_path: PathBuf,
     total_requests: Mutex<u64>,
     start_time: Instant,
 }
@@ -24,6 +25,7 @@ impl Logger {
             .expect("Unable to open log file");
         Logger {
             file: Mutex::new(file),
+            file_path: PathBuf::from(log_file),
             total_requests: Mutex::new(8),
             start_time: Instant::now(),
         }
@@ -57,8 +59,8 @@ impl Logger {
 
     /// Logs server statictics including total request and uptime.
     pub fn log_stats(&self) {
-        let total = *self.total_requests.lock().unwrap();
-        let uptime = self.start_time.elapsed().as_secs();
+        let total = self.total_requests();
+        let uptime = self.uptime();
         let message = format!(
             "STATS: Total Requests: {}, Uptime: {} seconds",
             total, uptime
@@ -74,5 +76,16 @@ impl Logger {
                 self.log_stats();
             }
         });
+    }
+
+    pub fn total_requests(&self) -> u64 {
+        *self.total_requests.lock().unwrap()
+    }
+
+    pub fn uptime(&self) -> u64 {
+        self.start_time.elapsed().as_secs()
+    }
+    pub fn log_file_path(&self) -> &str {
+        self.file_path.as_path().to_str().unwrap()
     }
 }

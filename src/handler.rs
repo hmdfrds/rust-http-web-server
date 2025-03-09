@@ -7,7 +7,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 use chrono::Utc;
-use chrono::format;
+
 use mime_guess::from_path;
 
 use crate::Config;
@@ -176,7 +176,7 @@ fn send_response(
     body: &str,
     headers: Option<Vec<(String, String)>>,
 ) {
-    let mut response = format!("HTTP/1.1 {} {}\r\n", status_code, status_code);
+    let mut response = format!("HTTP/1.1 {} {}\r\n", status_code, status_text);
     if let Some(hdrs) = headers {
         for (key, value) in hdrs {
             response.push_str(&format!("{}: {}\r\n", key, value));

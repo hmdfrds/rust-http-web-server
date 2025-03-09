@@ -1,15 +1,6 @@
-use std::{
-    io::{Read, Write},
-    net::{TcpListener, TcpStream},
-    sync::Arc,
-    thread,
-};
+use std::{net::TcpListener, sync::Arc, thread};
 
-use crate::{
-    config::Config,
-    handler::{self, handle_client},
-    logger::Logger,
-};
+use crate::{config::Config, handler::handle_client, logger::Logger};
 
 /// Starts the HTTP server by binding to the configured address and accepting connections.
 pub fn start_server(config: Arc<Config>, logger: Arc<Logger>) {
